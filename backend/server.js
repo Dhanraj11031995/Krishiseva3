@@ -62,6 +62,9 @@ const adminOnly = (req, res, next) =>
 const requireSub = (mod) => (req, res, next) => {
   if (req.user.role === "admin") return next();
   const u = db.users.find(u => u.id === req.user.id);
+  if (!u) {
+  return res.status(404).json({ error: "User not found" });
+}
   if (!u) return res.status(404).json({ error: "User not found" });
   const s = u.subscription;
   if (!s?.active) return res.status(402).json({ error: "subscription_required" });
@@ -143,11 +146,30 @@ app.get("/api/payment/history", auth, (req, res) => {
 //  PLACES & PLOTS
 // ============================================================
 app.get("/api/places", auth, (req, res) => {
-  if (req.user.role === "admin") return res.json(db.places);
+  if (req.user_role === "admin") {
+    return res.json(db.places);
+  }
+
   const u = db.users.find(u => u.id === req.user.id);
-  res.json(db.places.filter(p => (u.assignedPlaces||[]).includes(p.id)).map(pl => ({
-    ...pl, plots: pl.plots.filter(pt => pt.assignedUser === req.user.id)
-  })));
+
+  if (!u) {
+    return res.status(404).json({
+      error: "User not found"
+    });
+  }
+
+  res.json(
+    db.places
+      .filter(p =>
+        (u?.assignedPlaces || []).includes(p.id)
+      )
+      .map(pl => ({
+        ...pl,
+        plots: pl.plots.filter(
+          pt => pt.assignedUser === req.user.id
+        )
+      }))
+  );
 });
 app.post("/api/places", auth, adminOnly, (req, res) => {
   const p = { id: uuidv4(), plots: [], ...req.body }; db.places.push(p); res.status(201).json(p);
