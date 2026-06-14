@@ -638,7 +638,7 @@ export function PhotoGalleryPage() {
           <div className="photo-grid">
             {filtered.map(photo => (
               <div key={photo.id} className="photo-card" onClick={() => { setSelPhoto(photo); setTagInput((photo.tags||[]).join(', ')); }}>
-                <img src={`http://localhost:5000${photo.url}`} alt={photo.notes || 'Farm photo'}
+                <img src={`http://krishiseva-backend-mvlv.onrender.com${photo.url}`} alt={photo.notes || 'Farm photo'}
                   onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='var(--straw)'; }} />
                 <div className="photo-card-info">
                   <div style={{ fontSize: '.72rem', color: 'var(--earth)', marginBottom: 3 }}>
@@ -663,7 +663,7 @@ export function PhotoGalleryPage() {
             </div>
             <div className="modal-body">
               <div className="grid-2 gap-20">
-                <img src={`http://localhost:5000${selPhoto.url}`} alt="Farm"
+                <img src={`http://krishiseva-backend-mvlv.onrender.com${selPhoto.url}`} alt="Farm"
                   style={{ width:'100%', borderRadius:'var(--radius)', border:'1px solid var(--straw)', maxHeight:300, objectFit:'cover' }}
                   onError={e => { e.target.src=''; e.target.style.display='none'; }} />
                 <div>
