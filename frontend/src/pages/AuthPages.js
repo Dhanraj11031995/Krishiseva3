@@ -173,6 +173,10 @@ export function SubscribePage() {
         prefill: { name: user?.name, email: user?.email, contact: user?.phone },
         theme:   { color: '#2D6A2D' },
       };
+      console.log("Order data:", order);
+console.log("Razorpay key:", order?.key_id);
+console.log("Window Razorpay:", window.Razorpay);
+console.log("Options:", options);
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch(e) {
