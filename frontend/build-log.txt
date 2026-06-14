@@ -1,0 +1,5 @@
+npm error code EJSONPARSE
+npm error JSON.parse Invalid package.json: JSONParseError: Unexpected non-whitespace character after JSON at position 380 (line 17 column 4) while parsing near "...ripts build\"\r\n}\r\n  },\r\n  \"eslintConfig\":..."
+npm error JSON.parse Failed to parse JSON data.
+npm error JSON.parse Note: package.json must be actual JSON, not just JavaScript.
+npm error A complete log of this run can be found in: C:\Users\DWITY\AppData\Local\npm-cache\_logs\2026-06-14T07_18_56_494Z-debug-0.log
