@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-export const API = axios.create({ baseURL: 'http://localhost:5000/api' });
+export const API = axios.create({ baseURL: 'https://krishiseva-backend-mvlv.onrender.com/api' });
 API.interceptors.request.use(cfg => {
   const t = localStorage.getItem('ks_token');
   if (t) cfg.headers.Authorization = `Bearer ${t}`;
