@@ -151,7 +151,7 @@ export function SubscribePage() {
 
       // Real Razorpay checkout
       const options = {
-        key:         process.env.REACT_APP_RAZORPAY_KEY || order.key_id,
+        key: order.key_id,
         amount:      order.amount,
         currency:    'INR',
         name:        'KrishiSeva',
