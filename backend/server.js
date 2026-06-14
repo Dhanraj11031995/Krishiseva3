@@ -555,14 +555,17 @@ app.get("/api/admin/stats", auth, adminOnly, (req, res) => res.json({
 app.get("/api/admin/ai-log", auth, adminOnly, (req, res) => res.json(db.chatgptFallbackLog));
 
 // ── Start ────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log("═══════════════════════════════════════════════════════");
-  console.log(`  🌾 KrishiSeva v3 Backend – port ${PORT}`);
-  console.log(`  📡 API: http://localhost:${PORT}/api`);
-  console.log(`  🌱 Crops: All 9 categories loaded`);
-  console.log(`  💳 Razorpay: ${razorpay?"✅ Live":"⚠️  Mock (add keys to .env)"}`);
-  console.log(`  🤖 AI: ${process.env.OPENAI_API_KEY&&!process.env.OPENAI_API_KEY.includes("YOUR")?"✅ Live":"⚠️  Mock (add key to .env)"}`);
-  console.log("═══════════════════════════════════════════════════════");
+// --- Start
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+
+  console.log("======================================");
+  console.log(`🌾 KrishiSeva v3 Backend - port ${PORT}`);
+  console.log(`📡 API: http://localhost:${PORT}/api`);
+  console.log("🌱 Crops: All 9 categories loaded");
+  console.log(`💳 Razorpay: ${razorpay ? "✅ Live" : "⚠️ Mock"}`);
+  console.log(`🤖 AI: ${process.env.OPENAI_API_KEY ? "✅ Live" : "⚠️ Mock"}`);
+  console.log("======================================");
 });
 
 // ============================================================
