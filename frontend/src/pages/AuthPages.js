@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth, API } from '../context/AuthContext';
 import { LANGUAGES } from '../utils/translation';
 
@@ -66,6 +66,23 @@ export function LoginPage() {
             {loading ? '⏳ Logging in…' : '🌿 Login to Platform'}
           </button>
         </form>
+        <div style={{
+  textAlign:'center',
+  marginTop:16,
+  fontSize:'.9rem'
+}}>
+  New user?{' '}
+  <Link
+    to="/register"
+    style={{
+      color:'var(--leaf)',
+      fontWeight:600,
+      textDecoration:'none'
+    }}
+  >
+    Create Account
+  </Link>
+</div>
 
         <div className="divider" />
         <div className="grid-2" style={{ gap:10 }}>

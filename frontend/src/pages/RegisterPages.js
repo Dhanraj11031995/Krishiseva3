@@ -187,8 +187,11 @@ export function RegisterPage() {
       <div style={BOX}>
 
         <div className="text-center mb-24">
-          <div style={{ fontSize:'3rem', marginBottom:8 }}>{'\U0001F331'}</div>
-          <h1 style={{ fontFamily:'var(--font-display)', fontSize:'1.9rem', color:'var(--leaf)' }}>
+  <div style={{ fontSize:'3rem', marginBottom:8 }}>{'🌱'}</div>
+
+  <h1 style={{
+    fontFamily:'var(--font-display)',
+    fontSize:'1.9rem', color:'var(--leaf)' }}>
             {L === 'or' ? '\u0a28\u0b42\u0b06 \u0b16\u0b3e\u0b24\u0b3e \u0b16\u0b4b\u0b32\u0b28\u0b4d\u0b24\u0b41' : 'Create Your Account'}
           </h1>
           <p style={{ fontSize:'.78rem', color:'var(--earth)', marginTop:4 }}>
