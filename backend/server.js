@@ -14,10 +14,15 @@ const path    = require("path");
 const fs      = require("fs");
 const axios   = require("axios");
 const db      = require("./dataStore");
+const mongoose = require("mongoose");
+const User = require("./models/User");
 const { CROP_CATEGORIES, PEST_CATEGORIES, COST_CATEGORIES, GROWTH_STAGES, APP_METHODS } = require("./data/cropMaster");
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected ✅"))
+  .catch(err => console.error("MongoDB Error:", err));
 const JWT  = process.env.JWT_SECRET || "ks-v3-secret";
 
 // ── Multer (photo uploads) ──────────────────────────────────
@@ -85,9 +90,11 @@ app.get("/api/master/methods",     (req, res) => res.json(APP_METHODS));
 // ============================================================
 //  AUTH
 // ============================================================
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   const { username, password } = req.body;
-  const user = db.users.find(u => u.username === username);
+  const user = await User.findOne({
+  username
+});
   if (!user || !bcrypt.compareSync(password, user.password))
     return res.status(401).json({ error: "Invalid credentials" });
   const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, JWT, { expiresIn: "24h" });
@@ -516,7 +523,7 @@ app.get("/api/users", auth, adminOnly, (req, res) =>
 app.post("/api/users", auth, adminOnly, (req, res) => {
   if (db.users.find(u=>u.username===req.body.username)) return res.status(400).json({ error:"Username exists" });
   const user = { id:uuidv4(), ...req.body, password:bcrypt.hashSync(req.body.password,10), role:"user", subscription:{active:false,plan:null,expiresAt:null,accessModules:[]}, uploadedPhotos:[] };
-  db.users.push(user);
+  await User.create(user);
   const {password:_,...safe}=user; res.status(201).json(safe);
 });
 app.put("/api/users/:id", auth, adminOnly, (req, res) => {
@@ -594,7 +601,7 @@ app.post("/api/auth/register", async (req, res) => {
     registeredAt:   new Date().toISOString(),
   };
 
-  db.users.push(user);
+  await User.create(user);
   const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, JWT, { expiresIn: "24h" });
   const { password: _, ...safe } = user;
   res.status(201).json({ token, user: safe, message: "Registration successful!" });
