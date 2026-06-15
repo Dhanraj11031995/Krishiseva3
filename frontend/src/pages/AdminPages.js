@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AppLayout from '../components/shared/AppLayout';
 import { PrintBtn, PrintHeader, Spinner, EmptyState } from '../components/shared/UIKit';
-import { useAuth, API } from '../context/AuthContext';
+import { API } from '../context/AuthContext';
 
 /* ══════════════════════════════════════════════════════════
    ADMIN DASHBOARD
@@ -282,10 +282,6 @@ export function AdminPlacesPage() {
     finally { setLoading(false); }
   };
 
-  const allCrops = Object.entries(cropMaster).flatMap(([cat, data]) =>
-    (data.crops||[]).map(c => ({ ...c, category: cat, categoryLabel: data.label }))
-  );
-
   return (
     <AppLayout title="🗺️ Places & Plots">
       <div className="flex-between mb-20">
@@ -460,10 +456,6 @@ function AdminDataManager({ title, endpoint, fields, tableColumns, renderRow }) 
     API.get(`/${endpoint}`).then(r => setData(r.data)).catch(() => {});
     API.get('/master/crops').then(r => setCats(r.data)).catch(() => {});
   }, []); // eslint-disable-line
-
-  const allCrops = Object.entries(cats).flatMap(([cat, catData]) =>
-    (catData.crops||[]).map(c => ({ ...c, categoryKey: cat, categoryLabel: catData.label }))
-  );
 
   const save = async () => {
     setLoading(true);

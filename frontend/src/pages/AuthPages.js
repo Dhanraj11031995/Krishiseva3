@@ -60,43 +60,25 @@ export function LoginPage() {
             <label className="form-label">
               {language==='or'?'ପାସୱାର୍ଡ':language==='hi'?'पासवर्ड':'Password'}
             </label>
-            <div style={{ display: "flex", gap: "8px" }}>
-  <input
-    className="form-input"
-    type={showPassword ? "text" : "password"}
-    autoComplete="current-password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    style={{ flex: 1 }}
-  />
-
-  <button
-    type="button"
-    onClick={() => setShowPassword(!showPassword)}
-    className="btn btn-secondary"
-  >
-    {showPassword ? "Hide" : "Show"}
-  </button>
-<div style={{ display: "flex", gap: "8px" }}>
-  <input
-    className="form-input"
-    type={showPassword ? "text" : "password"}
-    autoComplete="current-password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    style={{ flex: 1 }}
-    placeholder="Enter password"
-    required
-  />
-
-  <button
-    type="button"
-    onClick={() => setShowPassword(!showPassword)}
-    className="btn btn-secondary"
-  >
-    {showPassword ? "Hide" : "Show"}
-  </button>
-</div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                className="form-input"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ flex: 1 }}
+                placeholder="Enter password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="btn btn-secondary"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
           <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>
             {loading ? '⏳ Logging in…' : '🌿 Login to Platform'}

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth, API } from '../context/AuthContext';
-import { LANGUAGES } from '../utils/translation';
 
 const COUNTRY_CODES = [
   { code:'+91',  flag:'🇮🇳', name:'India'      },
@@ -64,7 +63,7 @@ function Field({ label, labelOr, children, error, ok, hint }) {
 //  USER REGISTRATION PAGE
 // ======================================================
 export function RegisterPage() {
-  const { register, language, setLanguage } = useAuth();
+  const { register, language } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep]   = useState(1);
@@ -77,12 +76,7 @@ export function RegisterPage() {
   const [checking, setChecking] = useState({ username:false, email:false });
   const [loading,  setLoading]  = useState(false);
   const [srvError, setSrvError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);const [showSetupPassword, setShowSetupPassword] = useState(false);
-const [showSetupConfirmPassword, setShowSetupConfirmPassword] = useState(false);
-const [showChangePassword, setShowChangePassword] = useState(false);
-const [showChangeConfirmPassword, setShowChangeConfirmPassword] = useState(false);
-const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const set = (k, v) => {
     setForm(p => ({ ...p, [k]: v }));
@@ -316,228 +310,59 @@ const [showNewPassword, setShowNewPassword] = useState(false);
 
               <Field label={L === 'or' ? '\u0b2a\u0b3e\u0b38\u0b5f\u0b3e\u0b30\u0b4d\u0b21' : 'Password'} error={errors.password}>
                 <div style={{ position:'relative' }}>
-                  {/* NEW ADMIN PASSWORD */}
-<div className="form-group mb-14">
-  <label className="form-label">New Admin Password (min 8 chars)</label>
+                  <input
+                    className="form-input"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder={L === 'or' ? '********' : 'Enter password'}
+                    value={form.password}
+                    onChange={e => set('password', e.target.value)}
+                    style={{
+                      paddingRight: 40,
+                      borderColor: errors.password ? 'var(--danger)' : ''
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(p => !p)}
+                    style={{
+                      position: 'absolute',
+                      right: 10,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {showPassword ? '🙈' : '👁️'}
+                  </button>
+                </div>
+                <PasswordStrength password={form.password} />
+              </Field>
 
-  <div style={{ position: 'relative' }}>
-    <input
-      className="form-input"
-      type={showSetupPassword ? "text" : "password"}
-      placeholder="Strong password..."
-      value={form.newPassword}
-      onChange={e => set('newPassword', e.target.value)}
-      style={{
-        paddingRight: 40,
-        borderColor: errors.newPassword ? 'var(--danger)' : ''
-      }}
-    />
+              <Field label={L === 'or' ? '\u0b30\u0b3f\u0b2a\u0b3e\u0b38\u0b5f\u0b3e\u0b30\u0b4d\u0b21' : 'Confirm Password'} error={errors.confirmPass}>
+                <input
+                  className="form-input"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={L === 'or' ? 'Re-enter password' : 'Re-enter password'}
+                  value={form.confirmPass}
+                  onChange={e => set('confirmPass', e.target.value)}
+                  style={{ borderColor: errors.confirmPass ? 'var(--danger)' : '' }}
+                />
+              </Field>
 
-    <button
-      type="button"
-      onClick={() => setShowSetupPassword(p => !p)}
-      style={{
-        position: 'absolute',
-        right: 10,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer'
-      }}
-    >
-      {showSetupPassword ? "🙈" : "👁️"}
-    </button>
-  </div>
-
-  {errors.newPassword && (
-    <div style={{ fontSize: '.72rem', color: 'var(--danger)', marginTop: 3 }}>
-      {errors.newPassword}
-    </div>
-  )}
-
-  <PasswordStrength password={form.newPassword} />
-</div>
-
-{/* CONFIRM PASSWORD */}
-<div className="form-group mb-14">
-  <label className="form-label">Confirm Password</label>
-
-  <div style={{ position: 'relative' }}>
-    <input
-      className="form-input"
-      type={showSetupConfirmPassword ? "text" : "password"}
-      placeholder="Re-enter password"
-      value={form.confirmPass}
-      onChange={e => set('confirmPass', e.target.value)}
-      style={{
-        paddingRight: 40,
-        borderColor: errors.confirmPass
-          ? 'var(--danger)'
-          : (form.confirmPass && form.newPassword === form.confirmPass)
-            ? 'var(--leaf)'
-            : ''
-      }}
-    />
-
-    <button
-      type="button"
-      onClick={() => setShowSetupConfirmPassword(p => !p)}
-      style={{
-        position: 'absolute',
-        right: 10,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer'
-      }}
-    >
-      {showSetupConfirmPassword ? "🙈" : "👁️"}
-    </button>
-  </div>
-
-  {errors.confirmPass && (
-    <div style={{ fontSize: '.72rem', color: 'var(--danger)', marginTop: 3 }}>
-      {errors.confirmPass}
-    </div>
-  )}
-</div>
-{/* NEW PASSWORD */}
-<div className="form-group mb-14">
-  <label className="form-label">New Password (min 8 chars)</label>
-
-  <div style={{ position: 'relative' }}>
-    <input
-      className="form-input"
-      type={showChangePassword ? "text" : "password"}
-      placeholder="New strong password"
-      value={form.newPassword}
-      onChange={e => set('newPassword', e.target.value)}
-      style={{
-        paddingRight: 40,
-        borderColor: errors.newPassword ? 'var(--danger)' : ''
-      }}
-    />
-
-    <button
-      type="button"
-      onClick={() => setShowChangePassword(p => !p)}
-      style={{
-        position: 'absolute',
-        right: 10,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer'
-      }}
-    >
-      {showChangePassword ? "🙈" : "👁️"}
-    </button>
-  </div>
-
-  {errors.newPassword && (
-    <div style={{ fontSize: '.72rem', color: 'var(--danger)', marginTop: 3 }}>
-      {errors.newPassword}
-    </div>
-  )}
-
-  <PasswordStrength password={form.newPassword} />
-</div>
-
-{/* CONFIRM NEW PASSWORD */}
-<div className="form-group mb-20">
-  <label className="form-label">Confirm New Password</label>
-
-  <div style={{ position: 'relative' }}>
-    <input
-      className="form-input"
-      type={showChangeConfirmPassword ? "text" : "password"}
-      placeholder="Re-enter new password"
-      value={form.confirmPass}
-      onChange={e => set('confirmPass', e.target.value)}
-      style={{
-        paddingRight: 40,
-        borderColor: errors.confirmPass
-          ? 'var(--danger)'
-          : (form.confirmPass && form.newPassword === form.confirmPass)
-            ? 'var(--leaf)'
-            : ''
-      }}
-    />
-
-    <button
-      type="button"
-      onClick={() => setShowChangeConfirmPassword(p => !p)}
-      style={{
-        position: 'absolute',
-        right: 10,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer'
-      }}
-    >
-      {showChangeConfirmPassword ? "🙈" : "👁️"}
-    </button>
-  </div>
-
-  {errors.confirmPass && (
-    <div style={{ fontSize: '.72rem', color: 'var(--danger)', marginTop: 3 }}>
-      {errors.confirmPass}
-    </div>
-  )}
-</div>
-
-            <div style={{ display:'flex', gap:10 }}>
-              <button type="button" className="btn btn-secondary" onClick={() => navigate('/admin')}>Cancel</button>
-              <button type="submit" className="btn btn-primary btn-lg" style={{ flex:1 }} disabled={loading}>
-                {loading ? 'Saving...' : '\u{1F512} Change Password'}
-              </button>
+              <div style={{ display:'flex', gap:10 }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setStep(1)}>Back</button>
+                <button type="submit" className="btn btn-primary btn-lg" style={{ flex:1 }} disabled={loading}>
+                  {loading ? (L === 'or' ? '\u0b38\u0b3e\u0b02\u0b1a\u0b3f\u0b2f\u0b15\u0b4d\u0b24\u0b3f...' : 'Registering...') : (L === 'or' ? '\u0b06\u0b2b\u0b3f\u0b15\u0b4d\u0b24 \u0b2a\u0b3f\u0b28\u0b3e' : 'Create Account')}
+                </button>
+              </div>
             </div>
-          </form>
-        )}
-
-        {/* ── CHANGE USERNAME (authenticated) ── */}
-        {isAdmin && mode === 'change-user' && (
-          <form onSubmit={handleChangeUsername}>
-            <div className="form-group mb-14">
-              <label className="form-label">New Username</label>
-              <input className="form-input" placeholder="e.g. new_admin_name"
-                value={form.newUsername}
-                onChange={e => { set('newUsername', e.target.value.replace(/[^a-zA-Z0-9_]/g,'')); setUAvail(null); }}
-                style={{ borderColor: errors.newUsername ? 'var(--danger)' : uAvail === true ? 'var(--leaf)' : '' }} />
-              {errors.newUsername && <div style={{ fontSize:'.72rem', color:'var(--danger)', marginTop:3 }}>{errors.newUsername}</div>}
-              {!errors.newUsername && uAvail === true && <div style={{ fontSize:'.72rem', color:'var(--success)', marginTop:3 }}>{'\u2705'} Available</div>}
-              {checking && <div className="form-hint">Checking...</div>}
-            </div>
-            <div className="form-group mb-20">
-              <label className="form-label">Current Password (to confirm)</label>
-              <input className="form-input" type="password" placeholder="Enter your password"
-                value={form.currentPassword} onChange={e => set('currentPassword', e.target.value)}
-                style={{ borderColor: errors.currentPassword ? 'var(--danger)' : '' }} />
-              {errors.currentPassword && <div style={{ fontSize:'.72rem', color:'var(--danger)', marginTop:3 }}>{errors.currentPassword}</div>}
-            </div>
-            <div style={{ display:'flex', gap:10 }}>
-              <button type="button" className="btn btn-secondary" onClick={() => navigate('/admin')}>Cancel</button>
-              <button type="submit" className="btn btn-primary btn-lg" style={{ flex:1 }} disabled={loading}>
-                {loading ? 'Saving...' : '\u{1F464} Change Username'}
-              </button>
-            </div>
-          </form>
-        )}
+          )}
+        </form>
 
         <p style={{ textAlign:'center', fontSize:'.78rem', color:'var(--earth)', marginTop:20 }}>
-          {isAdmin ? (
-            <button type="button" style={{ background:'none', border:'none', cursor:'pointer', color:'var(--leaf)', fontWeight:600 }}
-              onClick={() => navigate('/admin')}>
-              {'\u2190'} Back to Dashboard
-            </button>
-          ) : (
-            <Link to="/login" style={{ color:'var(--leaf)', fontWeight:600 }}>{'\u2190'} Back to Login</Link>
-          )}
+          <Link to="/login" style={{ color:'var(--leaf)', fontWeight:600 }}>{'\u2190'} {L === 'or' ? '\u0b32\u0b4b\u0b17\u0b4d\u0b4f\u0b28\u0b4d' : 'Back to Login'}</Link>
         </p>
       </div>
     </div>
