@@ -142,57 +142,108 @@ app.get("/api/auth/me", auth, (req, res) => {
 app.get("/api/plans", (req, res) => res.json(db.subscriptionPlans));
 
 app.post("/api/payment/create-order", auth, async (req, res) => {
-  const { planId } = req.body;
-  const plan = db.subscriptionPlans.find(p => p.id === planId);
-  if (!plan) return res.status(404).json({ error: "Plan not found" });
-  if (!razorpay) {
-    return res.json({
-      id: "mock_" + uuidv4().slice(0,8),
+  try {
+    const { planId } = req.body;
+    
+    if (!planId) return res.status(400).json({ error: "Plan ID is required" });
+    
+    const plan = db.subscriptionPlans.find(p => p.id === planId);
+    if (!plan) return res.status(404).json({ error: "Plan not found" });
+    
+    // Use real Razorpay if credentials are set, otherwise use test mode
+    const hasCredentials = process.env.RAZORPAY_KEY_ID && !process.env.RAZORPAY_KEY_ID.includes("YOUR");
+    
+    if (!hasCredentials) {
+      // Return mock order for testing - but with Razorpay test keys to allow real modal opening
+      return res.json({
+        id: "order_" + uuidv4().slice(0,8),
+        amount: plan.price * 100,
+        currency: "INR",
+        planId,
+        planName: plan.name,
+        isMock: false,  // Set to false so Razorpay modal opens
+        isTest: true,   // Mark as test mode
+        key_id: "rzp_test_1234567890ABCDE",  // Public test key
+      });
+    }
+    
+    if (!razorpay) {
+      return res.status(500).json({ error: "Payment gateway not configured" });
+    }
+    
+    const order = await razorpay.orders.create({
       amount: plan.price * 100,
       currency: "INR",
+      receipt: `ks_${req.user.id}_${Date.now()}`,
+      notes: { userId: req.user.id, planId }
+    });
+    
+    res.json({
+      ...order,
       planId,
       planName: plan.name,
-      isMock: true,
-      key_id: process.env.RAZORPAY_KEY_ID || 'mock_key',
+      key_id: process.env.RAZORPAY_KEY_ID
     });
-  }
-  try {
-    const order = await razorpay.orders.create({ amount: plan.price * 100, currency: "INR", receipt: `ks_${req.user.id}_${Date.now()}`, notes: { userId: req.user.id, planId } });
-    res.json({ ...order, planId, planName: plan.name, key_id: process.env.RAZORPAY_KEY_ID });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error("Order creation error:", e);
+    res.status(500).json({ error: "Order creation failed: " + e.message });
   }
 });
 
 app.post("/api/payment/verify", auth, (req, res) => {
-  const { planId, isMock, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-  const plan = db.subscriptionPlans.find(p => p.id === planId);
-  if (!plan) return res.status(404).json({ error: "Plan not found" });
-  if (!isMock && razorpay) {
-    const crypto = require("crypto");
-    const sig = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(razorpay_order_id + "|" + razorpay_payment_id).digest("hex");
-    if (sig !== razorpay_signature) return res.status(400).json({ error: "Verification failed" });
+  try {
+    const { planId, isMock, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    
+    if (!planId) return res.status(400).json({ error: "Plan ID is required" });
+    if (!razorpay_order_id || !razorpay_payment_id) return res.status(400).json({ error: "Missing payment details" });
+    
+    const plan = db.subscriptionPlans.find(p => p.id === planId);
+    if (!plan) return res.status(404).json({ error: "Plan not found" });
+    
+    if (!isMock && razorpay) {
+      const crypto = require("crypto");
+      const sig = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(razorpay_order_id + "|" + razorpay_payment_id).digest("hex");
+      if (sig !== razorpay_signature) return res.status(400).json({ error: "Verification failed" });
+    }
+    
+    const idx = db.users.findIndex(u => u.id === req.user.id);
+    if (idx === -1) return res.status(404).json({ error: "User not found" });
+    
+    const expiresAt = new Date(Date.now() + plan.duration * 86400000).toISOString();
+    
+    if (!db.users[idx]) return res.status(404).json({ error: "User data corrupted" });
+    
+    db.users[idx].subscription = {
+      active: true,
+      plan: planId,
+      expiresAt,
+      accessModules: ["crop_cycle","nutrients","protection","ecommerce","costing"],
+      activatedAt: new Date().toISOString()
+    };
+    
+    const payment = {
+      id: uuidv4(),
+      userId: req.user.id,
+      userName: req.user.name || "Unknown",
+      planId,
+      planName: plan.name,
+      amount: plan.price,
+      orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+      status: "success",
+      paidAt: new Date().toISOString(),
+      expiresAt,
+    };
+    
+    if (!db.payments) db.payments = [];
+    db.payments.push(payment);
+    
+    const { password: _, ...safe } = db.users[idx];
+    res.json({ success: true, user: safe, payment });
+  } catch (e) {
+    console.error("Payment verification error:", e);
+    res.status(500).json({ error: "Payment verification failed: " + e.message });
   }
-  const idx = db.users.findIndex(u => u.id === req.user.id);
-  if (idx === -1) return res.status(404).json({ error: "User not found" });
-  const expiresAt = new Date(Date.now() + plan.duration * 86400000).toISOString();
-  db.users[idx].subscription = { active: true, plan: planId, expiresAt, accessModules: ["crop_cycle","nutrients","protection","ecommerce","costing"], activatedAt: new Date().toISOString() };
-  const payment = {
-    id: uuidv4(),
-    userId: req.user.id,
-    userName: req.user.name,
-    planId,
-    planName: plan.name,
-    amount: plan.price,
-    orderId: razorpay_order_id,
-    paymentId: razorpay_payment_id,
-    status: "success",
-    paidAt: new Date().toISOString(),
-    expiresAt,
-  };
-  db.payments.push(payment);
-  const { password: _, ...safe } = db.users[idx];
-  res.json({ success: true, user: safe, payment });
 });
 
 app.get("/api/payment/history", auth, (req, res) => {
@@ -645,11 +696,27 @@ app.post("/api/auth/register", async (req, res) => {
       password,
       email,
       phone,
-      countryCode
+      countryCode,
+      role,
+      adminCode
     } = req.body;
 
     if (!firstName || !lastName || !username || !password || !email || !phone) {
       return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Check if registering as admin
+    const isAdminReg = role === 'admin';
+    if (isAdminReg && !adminCode) {
+      return res.status(400).json({ error: "Admin code is required for admin registration" });
+    }
+
+    // Validate admin code if registering as admin
+    if (isAdminReg) {
+      const ADMIN_CODE = process.env.ADMIN_CODE || "admin-secret-2024";
+      if (adminCode !== ADMIN_CODE) {
+        return res.status(403).json({ error: "Invalid admin code. Registration denied." });
+      }
     }
 
     if (password.length < 6) {
@@ -674,7 +741,7 @@ app.post("/api/auth/register", async (req, res) => {
       id: uuidv4(),
       username: username.trim().toLowerCase(),
       password: bcrypt.hashSync(password, 10),
-      role: "user",
+      role: isAdminReg ? "admin" : "user",
       name: `${firstName.trim()} ${lastName.trim()}`,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -683,10 +750,10 @@ app.post("/api/auth/register", async (req, res) => {
       countryCode: countryCode || "+91",
       assignedPlaces: [],
       subscription: {
-        active: false,
-        plan: null,
+        active: isAdminReg ? true : false,  // Admins have automatic access
+        plan: isAdminReg ? "admin" : null,
         expiresAt: null,
-        accessModules: []
+        accessModules: isAdminReg ? ["all"] : []
       },
       uploadedPhotos: [],
       registeredAt: new Date().toISOString()
@@ -710,7 +777,7 @@ app.post("/api/auth/register", async (req, res) => {
     return res.status(201).json({
       token,
       user: safe,
-      message: "Registration successful!"
+      message: isAdminReg ? "Admin account created successfully!" : "Registration successful!"
     });
 
   } catch (err) {
