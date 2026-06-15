@@ -22,7 +22,7 @@ const app  = express();
 const PORT = process.env.PORT || 5000;
 console.log("__dirname =", __dirname);
 console.log("cwd =", process.cwd());
-console.log("MONGO_URI =", process.env.MONGO_URI);
+console.log("RAW MONGO_URI =", JSON.stringify(process.env.MONGO_URI));
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
@@ -30,6 +30,7 @@ mongoose.connect(process.env.MONGO_URI)
   })
   .catch(err => {
     console.error("MongoDB Error:", err);
+    process.exit(1);
   });
   
 const JWT  = process.env.JWT_SECRET || "ks-v3-secret";
@@ -583,17 +584,28 @@ app.get("/api/admin/ai-log", auth, adminOnly, (req, res) => res.json(db.chatgptF
 
 // ── Start ────────────────────────────────────────────────────
 // --- Start
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+async function startServer() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB connected");
 
-  console.log("======================================");
-  console.log(`🌾 KrishiSeva v3 Backend - port ${PORT}`);
-  console.log(`📡 API: http://localhost:${PORT}/api`);
-  console.log("🌱 Crops: All 9 categories loaded");
-  console.log(`💳 Razorpay: ${razorpay ? "✅ Live" : "⚠️ Mock"}`);
-  console.log(`🤖 AI: ${process.env.OPENAI_API_KEY ? "✅ Live" : "⚠️ Mock"}`);
-  console.log("======================================");
-});
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log("======================================");
+      console.log(`🌾 KrishiSeva v3 Backend - port ${PORT}`);
+      console.log(`📡 API: http://localhost:${PORT}/api`);
+      console.log("🌱 Crops: All 9 categories loaded");
+      console.log(`💳 Razorpay: ${razorpay ? "✅ Live" : "⚠️ Mock"}`);
+      console.log(`🤖 AI: ${process.env.OPENAI_API_KEY ? "✅ Live" : "⚠️ Mock"}`);
+      console.log("======================================");
+    });
+  } catch (err) {
+    console.error("SERVER START ERROR:", err);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 // ============================================================
 //  USER SELF-REGISTRATION
@@ -680,6 +692,7 @@ app.post("/api/auth/register", async (req, res) => {
 
   } catch (err) {
     console.error("REGISTER ERROR:", err);
+    process.exit(1);
 
     return res.status(500).json({
       error: err.message
