@@ -15,7 +15,7 @@ const fs      = require("fs");
 const axios   = require("axios");
 const db      = require("./dataStore");
 const mongoose = require("mongoose");
-const User = require("./models/User");
+const User = require("./models/user");
 const { CROP_CATEGORIES, PEST_CATEGORIES, COST_CATEGORIES, GROWTH_STAGES, APP_METHODS } = require("./data/cropMaster");
 
 const app  = express();
