@@ -191,10 +191,10 @@ export function RegisterPage() {
   <h1 style={{
     fontFamily:'var(--font-display)',
     fontSize:'1.9rem', color:'var(--leaf)' }}>
-            {L === 'or' ? '\u0a28\u0b42\u0b06 \u0b16\u0b3e\u0b24\u0b3e \u0b16\u0b4b\u0b32\u0b28\u0b4d\u0b24\u0b41' : 'Create Your Account'}
+            {L === 'or' ? 'ଆପଣଙ୍କର ଖାତା ସୃଷ୍ଟି କରନ୍ତୁ' : 'Create Your Account'}
           </h1>
           <p style={{ fontSize:'.78rem', color:'var(--earth)', marginTop:4 }}>
-            {L === 'or' ? 'KrishiSeva \u0b2a\u0b4d\u0b32\u0b3e\u0b1f\u0b2b\u0b30\u0b4d\u0b2e\u0b30\u0b47 \u0b2f\u0b4b\u0b17 \u0b26\u0b3f\u0b05\u0b28\u0b4d\u0b24\u0b41' : 'Join KrishiSeva Agricultural Platform'}
+            {L === 'or' ? 'KrishiSeva ପ୍ଲାଟଫର୍ମରେ ଯୋଗ ଦିଅନ୍ତୁ' : 'Join KrishiSeva Agricultural Platform'}
           </p>
         </div>
 

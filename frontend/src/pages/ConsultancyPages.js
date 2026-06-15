@@ -91,6 +91,7 @@ export function CultivationPage() {
   const { language, user } = useAuth();
   const { isSubscribed } = useAuth();
   const navigate = require('react-router-dom').useNavigate();
+  // eslint-disable-next-line no-unused-vars
   const [selCat,  setSelCat]  = useState('');
   const [selCrop, setSelCrop] = useState(null);
   const [data,    setData]    = useState([]);
@@ -566,7 +567,7 @@ export function CostingPage() {
 //  5. PHOTO GALLERY PAGE
 // ══════════════════════════════════════════════════════════
 export function PhotoGalleryPage() {
-  const { language, user } = useAuth();
+  const { language } = useAuth();
   const [photos,   setPhotos]   = useState([]);
   const [loading,  setLoading]  = useState(false);
   const [uploading,setUploading]= useState(false);

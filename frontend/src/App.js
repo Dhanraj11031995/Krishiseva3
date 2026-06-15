@@ -7,7 +7,7 @@ import './App.css';
 import { LoginPage, SubscribePage } from './pages/AuthPages';
 
 // Registration pages
-import { RegisterPage, AdminSetupPage } from './pages/RegisterPages';
+import { RegisterPage } from './pages/RegisterPages';
 
 // User pages
 import { UserDashboard, WeatherPage, AskAIPage } from './pages/UserPages';
@@ -66,7 +66,6 @@ function AppRoutes() {
       <Route path="/"         element={<Navigate to="/login" replace />} />
       <Route path="/login"    element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
-      <Route path="/admin-setup" element={<AdminSetupPage />} />
 
       {/* ── Farmer ── */}
       <Route path="/dashboard"             element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
