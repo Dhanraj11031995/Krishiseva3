@@ -146,12 +146,22 @@ app.post("/api/payment/create-order", auth, async (req, res) => {
   const plan = db.subscriptionPlans.find(p => p.id === planId);
   if (!plan) return res.status(404).json({ error: "Plan not found" });
   if (!razorpay) {
-    return res.json({ id: "mock_" + uuidv4().slice(0,8), amount: plan.price * 100, currency: "INR", planId, planName: plan.name, isMock: true });
+    return res.json({
+      id: "mock_" + uuidv4().slice(0,8),
+      amount: plan.price * 100,
+      currency: "INR",
+      planId,
+      planName: plan.name,
+      isMock: true,
+      key_id: process.env.RAZORPAY_KEY_ID || 'mock_key',
+    });
   }
   try {
     const order = await razorpay.orders.create({ amount: plan.price * 100, currency: "INR", receipt: `ks_${req.user.id}_${Date.now()}`, notes: { userId: req.user.id, planId } });
-    res.json({ ...order, planId, planName: plan.name });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    res.json({ ...order, planId, planName: plan.name, key_id: process.env.RAZORPAY_KEY_ID });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.post("/api/payment/verify", auth, (req, res) => {
@@ -166,7 +176,19 @@ app.post("/api/payment/verify", auth, (req, res) => {
   const idx = db.users.findIndex(u => u.id === req.user.id);
   const expiresAt = new Date(Date.now() + plan.duration * 86400000).toISOString();
   db.users[idx].subscription = { active: true, plan: planId, expiresAt, accessModules: ["crop_cycle","nutrients","protection","ecommerce","costing"], activatedAt: new Date().toISOString() };
-  const payment = { id: uuidv4(), userId: req.user.id, userName: req.user.name, planId, planName: plan.name, amount: plan.price, orderId: razorpay_order_id, paymentId: razorpay_payment_id, status: "success", paidAt: new Date().toISOString(), expiresAt };
+  const payment = {
+    id: uuidv4(),
+    userId: req.user.id,
+    userName: req.user.name,
+    planId,
+    planName: plan.name,
+    amount: plan.price,
+    orderId: razorpay_order_id,
+    paymentId: razorpay_payment_id,
+    status: "success",
+    paidAt: new Date().toISOString(),
+    expiresAt,
+  };
   db.payments.push(payment);
   const { password: _, ...safe } = db.users[idx];
   res.json({ success: true, user: safe, payment });
