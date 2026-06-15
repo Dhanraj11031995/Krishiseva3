@@ -23,9 +23,15 @@ const PORT = process.env.PORT || 5000;
 console.log("__dirname =", __dirname);
 console.log("cwd =", process.cwd());
 console.log("MONGO_URI =", process.env.MONGO_URI);
+
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected ✅"))
-  .catch(err => console.error("MongoDB Error:", err));
+  .then(() => {
+    console.log("MongoDB Connected ✅");
+  })
+  .catch(err => {
+    console.error("MongoDB Error:", err);
+  });
+  
 const JWT  = process.env.JWT_SECRET || "ks-v3-secret";
 
 // ── Multer (photo uploads) ──────────────────────────────────
@@ -52,7 +58,6 @@ try {
     razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
   }
 } catch {}
-
 
 app.use(cors({
   origin: function(origin, callback) {
