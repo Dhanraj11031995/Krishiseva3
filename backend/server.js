@@ -581,6 +581,8 @@ app.listen(PORT, "0.0.0.0", () => {
 //  USER SELF-REGISTRATION
 // ============================================================
 app.post("/api/auth/register", async (req, res) => {
+  console.log("REGISTER REQUEST RECEIVED");
+  console.log(req.body);
   const { firstName, lastName, username, password, email, phone, countryCode } = req.body;
 
   if (!firstName || !lastName || !username || !password || !email || !phone) {
