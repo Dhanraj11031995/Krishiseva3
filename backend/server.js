@@ -174,6 +174,7 @@ app.post("/api/payment/verify", auth, (req, res) => {
     if (sig !== razorpay_signature) return res.status(400).json({ error: "Verification failed" });
   }
   const idx = db.users.findIndex(u => u.id === req.user.id);
+  if (idx === -1) return res.status(404).json({ error: "User not found" });
   const expiresAt = new Date(Date.now() + plan.duration * 86400000).toISOString();
   db.users[idx].subscription = { active: true, plan: planId, expiresAt, accessModules: ["crop_cycle","nutrients","protection","ecommerce","costing"], activatedAt: new Date().toISOString() };
   const payment = {
