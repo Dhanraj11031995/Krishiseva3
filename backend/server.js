@@ -520,7 +520,7 @@ app.post("/api/orders",              auth, requireSub("ecommerce"), (req, res) =
 app.get("/api/users", auth, adminOnly, (req, res) =>
   res.json(db.users.filter(u=>u.role==="user").map(({password:_,...u})=>u))
 );
-app.post("/api/users", auth, adminOnly, (req, res) => {
+app.post("/api/users", auth, adminOnly, async (req, res) => {
   if (db.users.find(u=>u.username===req.body.username)) return res.status(400).json({ error:"Username exists" });
   const user = { id:uuidv4(), ...req.body, password:bcrypt.hashSync(req.body.password,10), role:"user", subscription:{active:false,plan:null,expiresAt:null,accessModules:[]}, uploadedPhotos:[] };
   await User.create(user);
