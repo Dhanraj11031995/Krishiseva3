@@ -75,10 +75,18 @@ app.use(cors({
   credentials: true
 }));
 app.use(cors({
-  origin: [
-    "https://project-lqbxc-6cnwkpd4b-dhanraj11031995s-projects.vercel.app",
-    "http://localhost:3000"
-  ],
+  origin: function(origin, callback) {
+
+    if (!origin || origin === "http://localhost:3000") {
+      return callback(null, true);
+    }
+
+    if (origin.endsWith(".vercel.app")) {
+      return callback(null, true);
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: "50mb" }));
@@ -602,44 +610,92 @@ app.listen(PORT, "0.0.0.0", () => {
 //  USER SELF-REGISTRATION
 // ============================================================
 app.post("/api/auth/register", async (req, res) => {
-  console.log("REGISTER REQUEST RECEIVED");
-  console.log(req.body);
-  const { firstName, lastName, username, password, email, phone, countryCode } = req.body;
+  try {
+    console.log("REGISTER REQUEST RECEIVED");
+    console.log(req.body);
 
-  if (!firstName || !lastName || !username || !password || !email || !phone) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-  if (password.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters" });
-  }
-  if (db.users.find(u => u.username === username)) {
-    return res.status(400).json({ error: "Username already taken. Please choose another." });
-  }
-  if (db.users.find(u => u.email === email)) {
-    return res.status(400).json({ error: "Email already registered." });
-  }
+    const {
+      firstName,
+      lastName,
+      username,
+      password,
+      email,
+      phone,
+      countryCode
+    } = req.body;
 
-  const user = {
-    id:             uuidv4(),
-    username:       username.trim().toLowerCase(),
-    password:       bcrypt.hashSync(password, 10),
-    role:           "user",
-    name:           `${firstName.trim()} ${lastName.trim()}`,
-    firstName:      firstName.trim(),
-    lastName:       lastName.trim(),
-    email:          email.trim().toLowerCase(),
-    phone:          phone.trim(),
-    countryCode:    countryCode || "+91",
-    assignedPlaces: [],
-    subscription:   { active: false, plan: null, expiresAt: null, accessModules: [] },
-    uploadedPhotos: [],
-    registeredAt:   new Date().toISOString(),
-  };
+    if (!firstName || !lastName || !username || !password || !email || !phone) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
 
-  await User.create(user);
-  const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, JWT, { expiresIn: "24h" });
-  const { password: _, ...safe } = user;
-  res.status(201).json({ token, user: safe, message: "Registration successful!" });
+    if (password.length < 6) {
+      return res.status(400).json({
+        error: "Password must be at least 6 characters"
+      });
+    }
+
+    if (db.users.find(u => u.username === username.toLowerCase())) {
+      return res.status(400).json({
+        error: "Username already taken. Please choose another."
+      });
+    }
+
+    if (db.users.find(u => u.email === email.toLowerCase())) {
+      return res.status(400).json({
+        error: "Email already registered."
+      });
+    }
+
+    const user = {
+      id: uuidv4(),
+      username: username.trim().toLowerCase(),
+      password: bcrypt.hashSync(password, 10),
+      role: "user",
+      name: `${firstName.trim()} ${lastName.trim()}`,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone.trim(),
+      countryCode: countryCode || "+91",
+      assignedPlaces: [],
+      subscription: {
+        active: false,
+        plan: null,
+        expiresAt: null,
+        accessModules: []
+      },
+      uploadedPhotos: [],
+      registeredAt: new Date().toISOString()
+    };
+
+    const savedUser = await User.create(user);
+
+    const token = jwt.sign(
+      {
+        id: savedUser.id,
+        role: savedUser.role,
+        name: savedUser.name
+      },
+      JWT,
+      { expiresIn: "24h" }
+    );
+
+    const { password: _, ...safe } =
+      savedUser.toObject ? savedUser.toObject() : savedUser;
+
+    return res.status(201).json({
+      token,
+      user: safe,
+      message: "Registration successful!"
+    });
+
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+
+    return res.status(500).json({
+      error: err.message
+    });
+  }
 });
 
 // ── Check username availability ──────────────────────────────
