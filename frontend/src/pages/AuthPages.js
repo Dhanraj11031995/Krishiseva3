@@ -186,15 +186,31 @@ export function SubscribePage() {
             await refreshUser();
             setSuccess(language==='or' ? 'ସଦସ୍ୟପଦ ସଫଳ!' : 'Subscription activated!');
             setTimeout(() => navigate('/dashboard'), 1500);
-          } catch(e) { setError('Payment verification failed'); }
+          } catch(e) { 
+            setError(e?.response?.data?.error || 'Payment verification failed. Please contact support.');
+            setLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setError(language==='or' ? 'ଭୁଗତାନ ରଦ୍ଦ କରାଯାଇଛି' : 'Payment cancelled');
+            setLoading(false);
+          }
         },
         prefill: { name: user?.name, email: user?.email, contact: user?.phone },
         theme:   { color: '#2D6A2D' },
       };
+      
+      if (!window.Razorpay) {
+        setError('Razorpay is not available. Please refresh the page.');
+        return;
+      }
+      
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch(e) {
-      setError(e?.response?.data?.error || 'Payment failed');
+      const errMsg = e?.response?.data?.error || e?.message || 'Payment failed. Please try again.';
+      setError(errMsg);
     } finally { setLoading(false); }
   };
 
