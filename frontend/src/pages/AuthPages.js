@@ -12,6 +12,7 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error,    setError]    = useState('');
   const [loading,  setLoading]  = useState(false);
+  const [loginMode, setLoginMode] = useState('user'); // 'user' or 'admin'
   const { login, language, setLanguage } = useAuth();
   const navigate = useNavigate();
 
@@ -19,6 +20,11 @@ export function LoginPage() {
     e.preventDefault(); setError(''); setLoading(true);
     try {
       const u = await login(username, password);
+      if (loginMode === 'admin' && u.role !== 'admin') {
+        setError('This account is not an admin account');
+        setLoading(false);
+        return;
+      }
       navigate(u.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
     } catch(err) {
       setError(err?.response?.data?.error || 'Invalid username or password');
@@ -47,6 +53,25 @@ export function LoginPage() {
         </div>
 
         {error && <div className="alert alert-error">⚠️ {error}</div>}
+
+        <div className="chip-group" style={{ marginBottom: 20 }}>
+          <button 
+            type="button"
+            className={`chip ${loginMode === 'user' ? 'active' : ''}`}
+            onClick={() => { setLoginMode('user'); setUsername(''); setPassword(''); setError(''); }}
+            style={{ flex: 1 }}
+          >
+            👨‍🌾 User Login
+          </button>
+          <button 
+            type="button"
+            className={`chip ${loginMode === 'admin' ? 'active' : ''}`}
+            onClick={() => { setLoginMode('admin'); setUsername(''); setPassword(''); setError(''); }}
+            style={{ flex: 1 }}
+          >
+            🛡️ Admin Login
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group mb-16">
@@ -89,9 +114,9 @@ export function LoginPage() {
   marginTop:16,
   fontSize:'.9rem'
 }}>
-  New user?{' '}
+  {loginMode === 'user' ? 'New user?' : 'New admin?'}{' '}
   <Link
-    to="/register"
+    to={loginMode === 'admin' ? '/register?role=admin' : '/register'}
     style={{
       color:'var(--leaf)',
       fontWeight:600,
@@ -147,24 +172,42 @@ export function SubscribePage() {
   }, []);
 
   const handleSubscribe = async (planId) => {
-    setLoading(true); setError('');
+    if (!planId) {
+      setError('Invalid plan selected');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
     try {
       const orderRes = await API.post('/payment/create-order', { planId });
       const order = orderRes.data;
 
-      if (order.isMock) {
-        // Mock payment – activate directly
-        await API.post('/payment/verify', {
-          planId,
-          isMock: true,
-          razorpay_order_id: order.id,
-          razorpay_payment_id: 'mock_pay_' + Date.now(),
-          razorpay_signature: 'mock_sig',
-        });
-        await refreshUser();
-        setSuccess(language==='or' ? 'ସଦସ୍ୟପଦ ସଫଳ ହୋଇଛି!' : 'Subscription activated successfully!');
-        setTimeout(() => navigate('/dashboard'), 2000);
+      if (!order || !order.id) {
+        setError('Failed to create payment order. Please try again.');
+        setLoading(false);
         return;
+      }
+
+      if (order.isMock && !order.isTest) {
+        // Pure mock payment – activate directly without opening modal
+        try {
+          await API.post('/payment/verify', {
+            planId,
+            isMock: true,
+            razorpay_order_id: order.id,
+            razorpay_payment_id: 'mock_pay_' + Date.now(),
+            razorpay_signature: 'mock_sig',
+          });
+          await refreshUser();
+          setSuccess(language==='or' ? 'ସଦସ୍ୟପଦ ସଫଳ ହୋଇଛି!' : 'Subscription activated successfully!');
+          setTimeout(() => navigate('/dashboard'), 2000);
+          return;
+        } catch (verifyErr) {
+          setError(verifyErr?.response?.data?.error || 'Mock payment verification failed');
+          setLoading(false);
+          return;
+        }
       }
 
       // Real Razorpay checkout
@@ -179,9 +222,10 @@ export function SubscribePage() {
           try {
             await API.post('/payment/verify', {
               planId,
-              razorpay_order_id:   response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature:  response.razorpay_signature,
+              isMock: order.isTest ? true : false,  // Treat test mode as mock verification
+              razorpay_order_id:   response.razorpay_order_id || order.id,
+              razorpay_payment_id: response.razorpay_payment_id || ('test_pay_' + Date.now()),
+              razorpay_signature:  response.razorpay_signature || 'test_sig',
             });
             await refreshUser();
             setSuccess(language==='or' ? 'ସଦସ୍ୟପଦ ସଫଳ!' : 'Subscription activated!');
@@ -202,7 +246,17 @@ export function SubscribePage() {
       };
       
       if (!window.Razorpay) {
-        setError('Razorpay is not available. Please refresh the page.');
+        // Razorpay script not loaded, wait a bit and try again
+        console.warn('Razorpay script not loaded, attempting to reload...');
+        setTimeout(() => {
+          if (!window.Razorpay) {
+            setError('Razorpay checkout not available. Please refresh the page and try again.');
+            setLoading(false);
+          } else {
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+          }
+        }, 1000);
         return;
       }
       

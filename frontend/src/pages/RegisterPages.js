@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth, API } from '../context/AuthContext';
 
 const COUNTRY_CODES = [
@@ -65,11 +65,14 @@ function Field({ label, labelOr, children, error, ok, hint }) {
 export function RegisterPage() {
   const { register, language } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const roleParam = searchParams.get('role') || 'user';
+  const isAdminReg = roleParam === 'admin';
 
   const [step, setStep]   = useState(1);
   const [form, setForm]   = useState({
     firstName:'', lastName:'', email:'', phone:'', countryCode:'+91',
-    username:'', password:'', confirmPass:'',
+    username:'', password:'', confirmPass:'', adminCode: '',
   });
   const [errors,   setErrors]   = useState({});
   const [avail,    setAvail]    = useState({ username:null, email:null });
@@ -138,6 +141,10 @@ export function RegisterPage() {
     else if (form.password.length < 6) e.password = 'Min 6 characters';
     if (!form.confirmPass) e.confirmPass = 'Required';
     else if (form.password !== form.confirmPass) e.confirmPass = 'Passwords do not match';
+    if (isAdminReg) {
+      if (!form.adminCode.trim()) e.adminCode = 'Admin code is required';
+      else if (form.adminCode.trim().length < 4) e.adminCode = 'Admin code must be at least 4 characters';
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -149,7 +156,7 @@ export function RegisterPage() {
     if (!validateStep2()) return;
     setLoading(true); setSrvError('');
     try {
-      const u = await register({
+      const regData = {
         firstName:   form.firstName.trim(),
         lastName:    form.lastName.trim(),
         username:    form.username.trim().toLowerCase(),
@@ -157,7 +164,12 @@ export function RegisterPage() {
         email:       form.email.trim().toLowerCase(),
         phone:       form.phone.trim(),
         countryCode: form.countryCode,
-      });
+      };
+      if (isAdminReg) {
+        regData.role = 'admin';
+        regData.adminCode = form.adminCode.trim();
+      }
+      const u = await register(regData);
       navigate(u.role === 'admin' ? '/admin' : '/dashboard', { replace:true });
     } catch(err) {
       setSrvError(err?.response?.data?.error || 'Registration failed. Please try again.');
@@ -186,15 +198,19 @@ export function RegisterPage() {
       <div style={BOX}>
 
         <div className="text-center mb-24">
-  <div style={{ fontSize:'3rem', marginBottom:8 }}>{'🌱'}</div>
+  <div style={{ fontSize:'3rem', marginBottom:8 }}>{isAdminReg ? '🛡️' : '🌱'}</div>
 
   <h1 style={{
     fontFamily:'var(--font-display)',
     fontSize:'1.9rem', color:'var(--leaf)' }}>
-            {L === 'or' ? 'ଆପଣଙ୍କର ଖାତା ସୃଷ୍ଟି କରନ୍ତୁ' : 'Create Your Account'}
+            {isAdminReg 
+              ? (L === 'or' ? 'ପରିଚାଳକ ଖାତା ସୃଷ୍ଟି କରନ୍ତୁ' : 'Create Admin Account')
+              : (L === 'or' ? 'ଆପଣଙ୍କର ଖାତା ସୃଷ୍ଟି କରନ୍ତୁ' : 'Create Your Account')}
           </h1>
           <p style={{ fontSize:'.78rem', color:'var(--earth)', marginTop:4 }}>
-            {L === 'or' ? 'KrishiSeva ପ୍ଲାଟଫର୍ମରେ ଯୋଗ ଦିଅନ୍ତୁ' : 'Join KrishiSeva Agricultural Platform'}
+            {isAdminReg
+              ? (L === 'or' ? 'KrishiSeva ପରିଚାଳନାରେ ଯୋଗ ଦିଅନ୍ତୁ' : 'Join KrishiSeva Administration')
+              : (L === 'or' ? 'KrishiSeva ପ୍ଲାଟଫର୍ମରେ ଯୋଗ ଦିଅନ୍ତୁ' : 'Join KrishiSeva Agricultural Platform')}
           </p>
         </div>
 
@@ -350,6 +366,19 @@ export function RegisterPage() {
                   style={{ borderColor: errors.confirmPass ? 'var(--danger)' : '' }}
                 />
               </Field>
+
+              {isAdminReg && (
+                <Field label={L === 'or' ? '\u0b2a\u0b30\u0b3f\u0b1a\u0b3e\u0b32\u0b15 \u0b15\u0b4b\u0b21 (Secret)' : 'Admin Secret Code'} error={errors.adminCode} hint={L === 'or' ? '\u0b38\u0b41\u0b30\u0b15\u0b4d\u0b37\u0b3f\u0b24 \u0b15\u0b4b\u0b21 \u0b2a\u0b4d\u0b30\u0b2c\u0b47\u0b36\u0b15\u0b31\u0b3f\u0b15\u0b4d\u0b30' : 'Enter the secret admin code provided by administrator'}>
+                  <input
+                    className="form-input"
+                    type="password"
+                    placeholder={L === 'or' ? '\u0b17\u0b41\u0b2a\u0b4d\u0b24 \u0b15\u0b4b\u0b21 \u0b26\u0b3f\u0b35' : 'Enter secret code'}
+                    value={form.adminCode}
+                    onChange={e => set('adminCode', e.target.value)}
+                    style={{ borderColor: errors.adminCode ? 'var(--danger)' : '' }}
+                  />
+                </Field>
+              )}
 
               <div style={{ display:'flex', gap:10 }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setStep(1)}>Back</button>
