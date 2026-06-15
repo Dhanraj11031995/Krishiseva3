@@ -55,7 +55,7 @@ try {
 
 app.use(cors({
   origin: [
-    "https://project-lqbxc-jbmabuv6v-dhanraj11031995s-projects.vercel.app/",
+    "https://project-lqbxc-jbmabuv6v-dhanraj11031995s-projects.vercel.app",
     "http://localhost:3000"
   ],
   credentials: true
