@@ -177,6 +177,7 @@ export function SubscribePage() {
 console.log("Razorpay key:", order?.key_id);
 console.log("Window Razorpay:", window.Razorpay);
 console.log("Options:", options);
+
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch(e) {

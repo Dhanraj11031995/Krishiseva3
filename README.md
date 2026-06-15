@@ -1,4 +1,3 @@
-=======
 # 🌾 KrishiSeva v3 – Agricultural Management Platform
 
 **Full-Stack Platform for Odisha Farmers**
@@ -13,7 +12,7 @@ React.js + Node.js/Express | Trilingual: English / ଓଡ଼ିଆ / हिन�
 cd backend
 npm install
 node server.js
-# Runs on http://localhost:5000
+# Runs on http://krishiseva-backend-mvlv.onrender.com
 ```
 
 ### Terminal 2 — Frontend
@@ -154,4 +153,4 @@ add a header with farmer name, date & platform logo.
 - [ ] Build Android/iOS app (React Native or PWA)
 - [ ] Add Google Maps for plot mapping
 - [ ] Deploy: Backend → Railway/Render, Frontend → Vercel/Netlify
->>>>>>> master.
+import SubWall from '../components/SubWall';

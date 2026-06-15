@@ -50,7 +50,13 @@ try {
   }
 } catch {}
 
-app.use(cors({ origin: "*" }));
+app.use(cors({
+  origin: [
+    "https://project-1qbxc-ae0u9w9dn-dhanraj11031995s-projects.vercel.app",
+    "http://localhost:3000"
+  ],
+  credentials: true
+}));
 app.use(express.json({ limit: "50mb" }));
 app.use("/uploads", express.static(uploadsDir));
 

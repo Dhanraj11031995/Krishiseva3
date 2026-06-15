@@ -724,7 +724,7 @@ export function AdminFieldDataPage() {
   const downloadCSV = async () => {
     try {
       const token = localStorage.getItem('ks_token');
-      const res = await fetch('http://localhost:5000/api/field-data/download', { headers:{ Authorization:`Bearer ${token}` } });
+      const res = await fetch('http://krishiseva-backend-mvlv.onrender.com/api/field-data/download', { headers:{ Authorization:`Bearer ${token}` } });
       const blob = await res.blob();
       const url  = window.URL.createObjectURL(blob);
       const a    = document.createElement('a'); a.href=url; a.download='field-data.csv'; a.click();
@@ -823,7 +823,7 @@ export function AdminPhotosPage() {
           <div className="photo-grid">
             {filtered.map(photo => (
               <div key={photo.id} className="photo-card">
-                <img src={`http://localhost:5000${photo.url}`} alt={photo.notes||'Farm photo'}
+                <img src={`http://krishiseva-backend-mvlv.onrender.com${photo.url}`} alt={photo.notes||'Farm photo'}
                   onError={e => { e.target.style.display='none'; }}
                   style={{ width:'100%', height:130, objectFit:'cover', display:'block' }} />
                 <div className="photo-card-info">
