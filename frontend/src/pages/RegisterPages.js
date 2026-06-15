@@ -77,7 +77,12 @@ export function RegisterPage() {
   const [checking, setChecking] = useState({ username:false, email:false });
   const [loading,  setLoading]  = useState(false);
   const [srvError, setSrvError] = useState('');
-  const [showPass, setShowPass] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);const [showSetupPassword, setShowSetupPassword] = useState(false);
+const [showSetupConfirmPassword, setShowSetupConfirmPassword] = useState(false);
+const [showChangePassword, setShowChangePassword] = useState(false);
+const [showChangeConfirmPassword, setShowChangeConfirmPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const [showNewPassword, setShowNewPassword] = useState(false);
 
   const set = (k, v) => {
     setForm(p => ({ ...p, [k]: v }));
@@ -311,341 +316,181 @@ export function RegisterPage() {
 
               <Field label={L === 'or' ? '\u0b2a\u0b3e\u0b38\u0b5f\u0b3e\u0b30\u0b4d\u0b21' : 'Password'} error={errors.password}>
                 <div style={{ position:'relative' }}>
-                  <input className="form-input" type={showPass ? 'text' : 'password'}
-                    placeholder={L === 'or' ? '\u0b05\u0b24\u0b3f \u0b15\u0b2e 6 \u0b05\u0b15\u0b4d\u0b37\u0b30' : 'Minimum 6 characters'}
-                    value={form.password} onChange={e => set('password', e.target.value)}
-                    style={{ paddingRight:40, borderColor: errors.password ? 'var(--danger)' : '' }} />
-                  <button type="button" onClick={() => setShowPass(p => !p)}
-                    style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)',
-                      background:'none', border:'none', cursor:'pointer', fontSize:'.9rem' }}>
-                    {showPass ? '\U0001F648' : '\U0001F441\uFE0F'}
-                  </button>
-                </div>
-                <PasswordStrength password={form.password} />
-              </Field>
+                  {/* NEW ADMIN PASSWORD */}
+<div className="form-group mb-14">
+  <label className="form-label">New Admin Password (min 8 chars)</label>
 
-              <Field label={L === 'or' ? '\u0b2a\u0b3e\u0b38\u0b5f\u0b3e\u0b30\u0b4d\u0b21 \u0b28\u0b3f\u0b36\u0b4d\u0b1a\u0b3f\u0b24' : 'Confirm Password'} error={errors.confirmPass}>
-                <input className="form-input" type={showPass ? 'text' : 'password'}
-                  placeholder={L === 'or' ? '\u0b2a\u0b41\u0b23\u0b3f \u0b32\u0b3f\u0b16' : 'Re-enter password'}
-                  value={form.confirmPass} onChange={e => set('confirmPass', e.target.value)}
-                  style={{ borderColor: errors.confirmPass ? 'var(--danger)' :
-                    (form.confirmPass && form.password === form.confirmPass) ? 'var(--leaf)' : '' }} />
-                {form.confirmPass && form.password === form.confirmPass && (
-                  <div style={{ fontSize:'.72rem', color:'var(--success)', marginTop:3 }}>
-                    {'\u2705'} Passwords match
-                  </div>
-                )}
-              </Field>
+  <div style={{ position: 'relative' }}>
+    <input
+      className="form-input"
+      type={showSetupPassword ? "text" : "password"}
+      placeholder="Strong password..."
+      value={form.newPassword}
+      onChange={e => set('newPassword', e.target.value)}
+      style={{
+        paddingRight: 40,
+        borderColor: errors.newPassword ? 'var(--danger)' : ''
+      }}
+    />
 
-              <div style={{ background:'var(--cream)', borderRadius:'var(--radius-sm)', padding:'12px 14px',
-                marginTop:14, fontSize:'.82rem', border:'1px solid var(--straw)' }}>
-                <div style={{ fontWeight:700, marginBottom:6 }}>
-                  {'\U0001F4CB'} {L === 'or' ? '\u0b38\u0b3e\u0b30\u0b3e\u0b02\u0b36' : 'Summary'}
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'auto 1fr', gap:'4px 14px' }}>
-                  <span style={{ color:'var(--earth)' }}>{L === 'or' ? '\u0b28\u0b3e\u0b2e' : 'Name'}:</span>
-                  <strong>{form.firstName} {form.lastName}</strong>
-                  <span style={{ color:'var(--earth)' }}>{L === 'or' ? '\u0b07-\u0b2e\u0b47\u0b32' : 'Email'}:</span>
-                  <span>{form.email}</span>
-                  <span style={{ color:'var(--earth)' }}>{L === 'or' ? '\u0b2b\u0b4b\u0b28' : 'Phone'}:</span>
-                  <span>{form.countryCode} {form.phone}</span>
-                </div>
-              </div>
+    <button
+      type="button"
+      onClick={() => setShowSetupPassword(p => !p)}
+      style={{
+        position: 'absolute',
+        right: 10,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer'
+      }}
+    >
+      {showSetupPassword ? "🙈" : "👁️"}
+    </button>
+  </div>
 
-              <div style={{ display:'flex', gap:10, marginTop:20 }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setStep(1)}>
-                  {'\u2190'} {L === 'or' ? '\u0b2a\u0b1b\u0b15\u0b41' : 'Back'}
-                </button>
-                <button type="submit" className="btn btn-primary btn-lg" style={{ flex:1 }} disabled={loading}>
-                  {loading ? 'Registering...' : (L === 'or' ? '\u2705 \u0b16\u0b3e\u0b24\u0b3e \u0b16\u0b4b\u0b32' : '\u2705 Create Account')}
-                </button>
-              </div>
-            </div>
-          )}
-        </form>
-
-        <div style={{ marginTop:20 }}>
-          <div style={{ fontSize:'.72rem', color:'var(--earth)', marginBottom:6, textTransform:'uppercase', letterSpacing:'.8px' }}>
-            {'\u0b2d\u0b3e\u0b37\u0b3e'} / Language
-          </div>
-          <div style={{ display:'flex', gap:8 }}>
-            {LANGUAGES.map(l => (
-              <button key={l.code} type="button" className={'chip ' + (language === l.code ? 'active' : '')}
-                style={{ flex:1, textAlign:'center' }} onClick={() => setLanguage(l.code)}>
-                {l.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <p style={{ textAlign:'center', fontSize:'.78rem', color:'var(--earth)', marginTop:16 }}>
-          {L === 'or' ? '\u0b2a\u0b42\u0b30\u0b4d\u0b2c\u0b30\u0b41 \u0b16\u0b3e\u0b24\u0b3e \u0b05\u0b1b\u0b3f?' : 'Already have an account?'}{' '}
-          <Link to="/login" style={{ color:'var(--leaf)', fontWeight:600 }}>
-            {L === 'or' ? '\u0b32\u0b17 \u0b07\u0b28' : 'Login'}
-          </Link>
-        </p>
-      </div>
+  {errors.newPassword && (
+    <div style={{ fontSize: '.72rem', color: 'var(--danger)', marginTop: 3 }}>
+      {errors.newPassword}
     </div>
-  );
-}
+  )}
 
-// ======================================================
-//  ADMIN SETUP PAGE
-// ======================================================
-export function AdminSetupPage() {
-  const { user, language } = useAuth();
-  const navigate = useNavigate();
-  const isAdmin = user?.role === 'admin';
+  <PasswordStrength password={form.newPassword} />
+</div>
 
-  const [mode,     setMode]     = useState('initial');
-  const [form,     setForm]     = useState({
-    setupKey:'', newUsername:'', newPassword:'', confirmPass:'',
-    currentPassword:'', name:'', email:'', phone:''
-  });
-  const [errors,   setErrors]   = useState({});
-  const [loading,  setLoading]  = useState(false);
-  const [success,  setSuccess]  = useState('');
-  const [srvError, setSrvError] = useState('');
-  const [showPass, setShowPass] = useState(false);
-  const [uAvail,   setUAvail]   = useState(null);
-  const [checking, setChecking] = useState(false);
+{/* CONFIRM PASSWORD */}
+<div className="form-group mb-14">
+  <label className="form-label">Confirm Password</label>
 
-  const set = (k, v) => { setForm(p => ({ ...p, [k]: v })); setErrors(p => ({ ...p, [k]: '' })); };
+  <div style={{ position: 'relative' }}>
+    <input
+      className="form-input"
+      type={showSetupConfirmPassword ? "text" : "password"}
+      placeholder="Re-enter password"
+      value={form.confirmPass}
+      onChange={e => set('confirmPass', e.target.value)}
+      style={{
+        paddingRight: 40,
+        borderColor: errors.confirmPass
+          ? 'var(--danger)'
+          : (form.confirmPass && form.newPassword === form.confirmPass)
+            ? 'var(--leaf)'
+            : ''
+      }}
+    />
 
-  useEffect(() => {
-    if (!form.newUsername || form.newUsername.length < 3) return;
-    const t = setTimeout(async () => {
-      setChecking(true);
-      try {
-        const r = await API.get('/auth/check-username/' + encodeURIComponent(form.newUsername));
-        setUAvail(r.data.available);
-      } catch(e) {}
-      finally { setChecking(false); }
-    }, 600);
-    return () => clearTimeout(t);
-  }, [form.newUsername]);
+    <button
+      type="button"
+      onClick={() => setShowSetupConfirmPassword(p => !p)}
+      style={{
+        position: 'absolute',
+        right: 10,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer'
+      }}
+    >
+      {showSetupConfirmPassword ? "🙈" : "👁️"}
+    </button>
+  </div>
 
-  const handleInitialSetup = async (e) => {
-    e.preventDefault();
-    const errs = {};
-    if (!form.setupKey.trim())    errs.setupKey    = 'Setup key required';
-    if (!form.newUsername.trim()) errs.newUsername  = 'Username required';
-    else if (form.newUsername.length < 3) errs.newUsername = 'Min 3 characters';
-    else if (!/^[a-zA-Z0-9_]+$/.test(form.newUsername)) errs.newUsername = 'Letters, numbers, _ only';
-    else if (uAvail === false) errs.newUsername = 'Username taken';
-    if (!form.newPassword) errs.newPassword = 'Required';
-    else if (form.newPassword.length < 8) errs.newPassword = 'Admin password needs min 8 characters';
-    if (form.newPassword !== form.confirmPass) errs.confirmPass = 'Passwords do not match';
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
+  {errors.confirmPass && (
+    <div style={{ fontSize: '.72rem', color: 'var(--danger)', marginTop: 3 }}>
+      {errors.confirmPass}
+    </div>
+  )}
+</div>
+{/* NEW PASSWORD */}
+<div className="form-group mb-14">
+  <label className="form-label">New Password (min 8 chars)</label>
 
-    setLoading(true); setSrvError('');
-    try {
-      await API.post('/admin/setup', {
-        setupKey:    form.setupKey.trim(),
-        newUsername: form.newUsername.trim().toLowerCase(),
-        newPassword: form.newPassword,
-        name:        form.name  || undefined,
-        email:       form.email || undefined,
-        phone:       form.phone || undefined,
-      });
-      setSuccess('Admin credentials set! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 2500);
-    } catch(err) {
-      setSrvError(err?.response?.data?.error || 'Setup failed');
-    } finally { setLoading(false); }
-  };
+  <div style={{ position: 'relative' }}>
+    <input
+      className="form-input"
+      type={showChangePassword ? "text" : "password"}
+      placeholder="New strong password"
+      value={form.newPassword}
+      onChange={e => set('newPassword', e.target.value)}
+      style={{
+        paddingRight: 40,
+        borderColor: errors.newPassword ? 'var(--danger)' : ''
+      }}
+    />
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    const errs = {};
-    if (!form.currentPassword) errs.currentPassword = 'Required';
-    if (!form.newPassword) errs.newPassword = 'Required';
-    else if (form.newPassword.length < 8) errs.newPassword = 'Min 8 characters';
-    if (form.newPassword !== form.confirmPass) errs.confirmPass = 'Passwords do not match';
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-    setLoading(true); setSrvError('');
-    try {
-      await API.put('/admin/change-password', {
-        currentPassword: form.currentPassword,
-        newPassword: form.newPassword,
-      });
-      setSuccess('Password changed successfully!');
-      setForm(p => ({ ...p, currentPassword:'', newPassword:'', confirmPass:'' }));
-    } catch(err) {
-      setSrvError(err?.response?.data?.error || 'Change failed');
-    } finally { setLoading(false); }
-  };
+    <button
+      type="button"
+      onClick={() => setShowChangePassword(p => !p)}
+      style={{
+        position: 'absolute',
+        right: 10,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer'
+      }}
+    >
+      {showChangePassword ? "🙈" : "👁️"}
+    </button>
+  </div>
 
-  const handleChangeUsername = async (e) => {
-    e.preventDefault();
-    const errs = {};
-    if (!form.newUsername.trim()) errs.newUsername = 'Required';
-    else if (form.newUsername.length < 3) errs.newUsername = 'Min 3 characters';
-    else if (uAvail === false) errs.newUsername = 'Username taken';
-    if (!form.currentPassword) errs.currentPassword = 'Password required to confirm';
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-    setLoading(true); setSrvError('');
-    try {
-      await API.put('/admin/change-username', {
-        newUsername: form.newUsername.trim().toLowerCase(),
-        password: form.currentPassword,
-      });
-      setSuccess('Username changed! Please login again.');
-      setTimeout(() => { localStorage.removeItem('ks_token'); navigate('/login'); }, 2500);
-    } catch(err) {
-      setSrvError(err?.response?.data?.error || 'Change failed');
-    } finally { setLoading(false); }
-  };
+  {errors.newPassword && (
+    <div style={{ fontSize: '.72rem', color: 'var(--danger)', marginTop: 3 }}>
+      {errors.newPassword}
+    </div>
+  )}
 
-  const L = language;
-  const WRAP = { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center',
-    background:'linear-gradient(145deg,var(--soil) 0%,#3D2408 50%,var(--sky) 100%)', padding:20 };
-  const BOX  = { background:'white', borderRadius:22, padding:'40px 44px', width:'100%', maxWidth:520,
-    boxShadow:'0 24px 64px rgba(0,0,0,.35)' };
+  <PasswordStrength password={form.newPassword} />
+</div>
 
-  return (
-    <div style={WRAP}>
-      <div style={BOX}>
-        <div className="text-center mb-20">
-          <div style={{ fontSize:'3rem', marginBottom:8 }}>{'\u{1F6E1}'}</div>
-          <h1 style={{ fontFamily:'var(--font-display)', fontSize:'1.9rem', color:'var(--soil)' }}>
-            Admin Setup
-          </h1>
-          <p style={{ fontSize:'.78rem', color:'var(--earth)', marginTop:4 }}>
-            KrishiSeva Platform Configuration
-          </p>
-        </div>
+{/* CONFIRM NEW PASSWORD */}
+<div className="form-group mb-20">
+  <label className="form-label">Confirm New Password</label>
 
-        {success   && <div className="alert alert-success mb-16">{'\u2705'} {success}</div>}
-        {srvError  && <div className="alert alert-error mb-16">{'\u26a0\ufe0f'} {srvError}</div>}
+  <div style={{ position: 'relative' }}>
+    <input
+      className="form-input"
+      type={showChangeConfirmPassword ? "text" : "password"}
+      placeholder="Re-enter new password"
+      value={form.confirmPass}
+      onChange={e => set('confirmPass', e.target.value)}
+      style={{
+        paddingRight: 40,
+        borderColor: errors.confirmPass
+          ? 'var(--danger)'
+          : (form.confirmPass && form.newPassword === form.confirmPass)
+            ? 'var(--leaf)'
+            : ''
+      }}
+    />
 
-        {/* Mode tabs - only show for logged-in admin */}
-        {isAdmin && (
-          <div className="platform-tabs mb-20">
-            {[
-              { key:'change-pass', label:'Change Password' },
-              { key:'change-user', label:'Change Username' },
-            ].map(m => (
-              <button key={m.key}
-                className={'platform-tab ' + (mode === m.key ? 'active' : '')}
-                onClick={() => { setMode(m.key); setErrors({}); setSrvError(''); setSuccess(''); }}>
-                {m.label}
-              </button>
-            ))}
-          </div>
-        )}
+    <button
+      type="button"
+      onClick={() => setShowChangeConfirmPassword(p => !p)}
+      style={{
+        position: 'absolute',
+        right: 10,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer'
+      }}
+    >
+      {showChangeConfirmPassword ? "🙈" : "👁️"}
+    </button>
+  </div>
 
-        {/* ── INITIAL SETUP (unauthenticated) ── */}
-        {!isAdmin && (
-          <form onSubmit={handleInitialSetup}>
-            <div className="alert alert-info mb-16">
-              {'\u{1F511}'} Enter the <strong>ADMIN_SETUP_KEY</strong> from your backend <code>.env</code> file to set admin credentials.
-            </div>
+  {errors.confirmPass && (
+    <div style={{ fontSize: '.72rem', color: 'var(--danger)', marginTop: 3 }}>
+      {errors.confirmPass}
+    </div>
+  )}
+</div>
 
-            <div className="form-group mb-14">
-              <label className="form-label">Setup Key (from .env)</label>
-              <input className="form-input" type="password"
-                placeholder="krishiseva-admin-setup-2024"
-                value={form.setupKey} onChange={e => set('setupKey', e.target.value)}
-                style={{ borderColor: errors.setupKey ? 'var(--danger)' : '' }} />
-              {errors.setupKey && <div style={{ fontSize:'.72rem', color:'var(--danger)', marginTop:3 }}>{errors.setupKey}</div>}
-            </div>
-
-            <div className="divider" />
-
-            <div className="form-group mb-14">
-              <label className="form-label">New Admin Username</label>
-              <input className="form-input" placeholder="e.g. krishiseva_admin"
-                value={form.newUsername}
-                onChange={e => { set('newUsername', e.target.value.replace(/[^a-zA-Z0-9_]/g,'')); setUAvail(null); }}
-                style={{ borderColor: errors.newUsername ? 'var(--danger)' : uAvail === true ? 'var(--leaf)' : '' }} />
-              {errors.newUsername && <div style={{ fontSize:'.72rem', color:'var(--danger)', marginTop:3 }}>{errors.newUsername}</div>}
-              {!errors.newUsername && uAvail === true && <div style={{ fontSize:'.72rem', color:'var(--success)', marginTop:3 }}>{'\u2705'} Username available</div>}
-              {checking && <div className="form-hint">Checking...</div>}
-            </div>
-
-            <div className="form-group mb-14">
-              <label className="form-label">New Admin Password (min 8 chars)</label>
-              <div style={{ position:'relative' }}>
-                <input className="form-input" type={showPass ? 'text' : 'password'}
-                  placeholder="Strong password..."
-                  value={form.newPassword} onChange={e => set('newPassword', e.target.value)}
-                  style={{ paddingRight:40, borderColor: errors.newPassword ? 'var(--danger)' : '' }} />
-                <button type="button" onClick={() => setShowPass(p => !p)}
-                  style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)',
-                    background:'none', border:'none', cursor:'pointer', fontSize:'.9rem' }}>
-                  {showPass ? '\U0001F648' : '\U0001F441\uFE0F'}
-                </button>
-              </div>
-              {errors.newPassword && <div style={{ fontSize:'.72rem', color:'var(--danger)', marginTop:3 }}>{errors.newPassword}</div>}
-              <PasswordStrength password={form.newPassword} />
-            </div>
-
-            <div className="form-group mb-14">
-              <label className="form-label">Confirm Password</label>
-              <input className="form-input" type={showPass ? 'text' : 'password'}
-                placeholder="Re-enter password"
-                value={form.confirmPass} onChange={e => set('confirmPass', e.target.value)}
-                style={{ borderColor: errors.confirmPass ? 'var(--danger)' :
-                  (form.confirmPass && form.newPassword === form.confirmPass) ? 'var(--leaf)' : '' }} />
-              {errors.confirmPass && <div style={{ fontSize:'.72rem', color:'var(--danger)', marginTop:3 }}>{errors.confirmPass}</div>}
-            </div>
-
-            <div className="divider" />
-            <p style={{ fontSize:'.78rem', color:'var(--earth)', marginBottom:12 }}>Optional – Admin profile details:</p>
-            <div className="grid-2" style={{ gap:12, marginBottom:20 }}>
-              {[['name','Full Name','e.g. Admin User'],['email','Email','admin@krishiseva.in'],['phone','Phone','9000000000']].map(([k,l,pl]) => (
-                <div key={k} className="form-group" style={k==='name'?{gridColumn:'1/-1'}:{}}>
-                  <label className="form-label">{l} (optional)</label>
-                  <input className="form-input" placeholder={pl} value={form[k]} onChange={e => set(k, e.target.value)} />
-                </div>
-              ))}
-            </div>
-
-            <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>
-              {loading ? 'Saving...' : '\u2705 Set Admin Credentials'}
-            </button>
-          </form>
-        )}
-
-        {/* ── CHANGE PASSWORD (authenticated) ── */}
-        {isAdmin && mode === 'change-pass' && (
-          <form onSubmit={handleChangePassword}>
-            <div className="form-group mb-14">
-              <label className="form-label">Current Password</label>
-              <input className="form-input" type="password" placeholder="Your current password"
-                value={form.currentPassword} onChange={e => set('currentPassword', e.target.value)}
-                style={{ borderColor: errors.currentPassword ? 'var(--danger)' : '' }} />
-              {errors.currentPassword && <div style={{ fontSize:'.72rem', color:'var(--danger)', marginTop:3 }}>{errors.currentPassword}</div>}
-            </div>
-            <div className="form-group mb-14">
-              <label className="form-label">New Password (min 8 chars)</label>
-              <div style={{ position:'relative' }}>
-                <input className="form-input" type={showPass ? 'text' : 'password'}
-                  placeholder="New strong password"
-                  value={form.newPassword} onChange={e => set('newPassword', e.target.value)}
-                  style={{ paddingRight:40, borderColor: errors.newPassword ? 'var(--danger)' : '' }} />
-                <button type="button" onClick={() => setShowPass(p => !p)}
-                  style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)',
-                    background:'none', border:'none', cursor:'pointer', fontSize:'.9rem' }}>
-                  {showPass ? '\U0001F648' : '\U0001F441\uFE0F'}
-                </button>
-              </div>
-              {errors.newPassword && <div style={{ fontSize:'.72rem', color:'var(--danger)', marginTop:3 }}>{errors.newPassword}</div>}
-              <PasswordStrength password={form.newPassword} />
-            </div>
-            <div className="form-group mb-20">
-              <label className="form-label">Confirm New Password</label>
-              <input className="form-input" type={showPass ? 'text' : 'password'}
-                placeholder="Re-enter new password"
-                value={form.confirmPass} onChange={e => set('confirmPass', e.target.value)}
-                style={{ borderColor: errors.confirmPass ? 'var(--danger)' :
-                  (form.confirmPass && form.newPassword === form.confirmPass) ? 'var(--leaf)' : '' }} />
-              {errors.confirmPass && <div style={{ fontSize:'.72rem', color:'var(--danger)', marginTop:3 }}>{errors.confirmPass}</div>}
-            </div>
             <div style={{ display:'flex', gap:10 }}>
               <button type="button" className="btn btn-secondary" onClick={() => navigate('/admin')}>Cancel</button>
               <button type="submit" className="btn btn-primary btn-lg" style={{ flex:1 }} disabled={loading}>
