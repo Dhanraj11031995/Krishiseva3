@@ -53,6 +53,27 @@ try {
   }
 } catch {}
 
+const cors = require("cors");
+
+app.use(cors({
+  origin: function(origin, callback) {
+
+    // Allow local development
+    if (!origin || origin === "http://localhost:3000") {
+      return callback(null, true);
+    }
+
+    // Allow all Vercel deployments of your project
+    if (
+      origin.endsWith(".vercel.app")
+    ) {
+      return callback(null, true);
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true
+}));
 app.use(cors({
   origin: [
     "https://project-lqbxc-6cnwkpd4b-dhanraj11031995s-projects.vercel.app",
