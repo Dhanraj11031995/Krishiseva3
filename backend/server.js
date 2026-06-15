@@ -20,6 +20,9 @@ const { CROP_CATEGORIES, PEST_CATEGORIES, COST_CATEGORIES, GROWTH_STAGES, APP_ME
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
+console.log("__dirname =", __dirname);
+console.log("cwd =", process.cwd());
+console.log("MONGO_URI =", process.env.MONGO_URI);
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected ✅"))
   .catch(err => console.error("MongoDB Error:", err));
@@ -52,7 +55,7 @@ try {
 
 app.use(cors({
   origin: [
-    "https://project-1qbxc-ae0u9w9dn-dhanraj11031995s-projects.vercel.app",
+    "https://project-lqbxc-jbmabuv6v-dhanraj11031995s-projects.vercel.app/",
     "http://localhost:3000"
   ],
   credentials: true
