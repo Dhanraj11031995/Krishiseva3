@@ -53,7 +53,6 @@ try {
   }
 } catch {}
 
-const cors = require("cors");
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -67,21 +66,6 @@ app.use(cors({
     if (
       origin.endsWith(".vercel.app")
     ) {
-      return callback(null, true);
-    }
-
-    callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true
-}));
-app.use(cors({
-  origin: function(origin, callback) {
-
-    if (!origin || origin === "http://localhost:3000") {
-      return callback(null, true);
-    }
-
-    if (origin.endsWith(".vercel.app")) {
       return callback(null, true);
     }
 
